@@ -11,5 +11,5 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
-      - run: chmod +x gradlew
-      - run: ./gradlew build
+      - uses: gradle/actions/setup-gradle@v4
+      - run: gradle build

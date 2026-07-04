@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package ratelimiter;
+
+option java_package = "com.ratelimiter.proto";
+option java_multiple_files = true;
+
+enum Algorithm {
+    TOKEN_BUCKET = 0;
+    SLIDING_WINDOW_LOG = 1;
+    SLIDING_WINDOW_COUNTER = 2;
+}
+
+message CheckRateLimitRequest {
+    string client_id = 1;
+    string resource = 2;
+}
+
+message CheckRateLimitResponse {
+    bool allowed = 1;
+    int64 remaining = 2;
+    int64 retry_after_ms = 3;
+}
+
+message ConfigureLimitRequest {
+    string client_id = 1;
+    string resource = 2;
+    Algorithm algorithm = 3;
+    int64 limit = 4;
+    int64 window_ms = 5;
+}
+
+message ConfigureLimitResponse {
+    bool success = 1;
+    string message = 2;
+}
+
+service RateLimiterService {
+    rpc CheckRateLimit(CheckRateLimitRequest) returns (CheckRateLimitResponse);
+    rpc ConfigureLimit(ConfigureLimitRequest) returns (ConfigureLimitResponse);
+}

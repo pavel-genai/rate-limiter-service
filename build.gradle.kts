@@ -19,7 +19,7 @@ val grpcKotlinVersion = "1.4.1"
 val protobufVersion = "3.25.2"
 val coroutinesVersion = "1.7.3"
 val lettuceVersion = "6.3.1.RELEASE"
-val testcontainersVersion = "1.19.3"
+val testcontainersVersion = "1.21.4"
 
 dependencies {
     // Kotlin
@@ -84,6 +84,7 @@ application {
 tasks.test {
     useJUnitPlatform()
     finalizedBy(tasks.jacocoTestReport)
+    jvmArgs("--add-opens", "java.base/java.util=ALL-UNNAMED")
 }
 
 tasks.jacocoTestReport {

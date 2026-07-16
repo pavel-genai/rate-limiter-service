@@ -88,6 +88,29 @@ class RateLimiterGrpcServiceEdgeCaseTest {
     }
 
     @Test
+    fun `configureLimit else branch rejects unknown algorithm value when invoked directly`() = runBlocking {
+        // Building the request through the Kotlin DSL rejects UNRECOGNIZED in
+        // the setter, so we use the Java builder's setAlgorithmValue(int) with
+        // an unknown wire value (99). The parsed request then reports
+        // algorithm = Algorithm.UNRECOGNIZED, which routes the `when` in
+        // configureLimit to its else branch (the INVALID_ARGUMENT throw).
+        val request = com.ratelimiter.proto.ConfigureLimitRequest.newBuilder()
+            .setClientId("client-1")
+            .setResource("/api/test")
+            .setAlgorithmValue(99)
+            .setLimit(10)
+            .setWindowMs(60_000)
+            .build()
+
+        val service = RateLimiterGrpcService(configStore, redis)
+        val ex = assertThrows(StatusException::class.java) {
+            runBlocking { service.configureLimit(request) }
+        }
+        assertEquals(io.grpc.Status.INVALID_ARGUMENT.code, ex.status.code)
+        assertTrue(ex.status.description!!.contains("Unknown algorithm"))
+    }
+
+    @Test
     fun `checkRateLimit returns correct response fields for denied request`() = runBlocking {
         val config = RateLimitConfig(
             clientId = "client-denied",
